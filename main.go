@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"net/http"
+	"os"
 
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/awserr"
@@ -56,5 +57,11 @@ func main() {
 
 	http.HandleFunc("/", serve)
 
-	http.ListenAndServe(":8090", nil)
+	addr := ":8090"
+	host, port := os.Getenv("HOST"), os.Getenv("PORT")
+	if host != "" || port != "" {
+		addr = host + ":" + port
+	}
+	fmt.Printf("Starting on: %s", addr)
+	http.ListenAndServe(addr, nil)
 }
