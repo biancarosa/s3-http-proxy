@@ -15,7 +15,9 @@ import (
 )
 
 func serve(w http.ResponseWriter, req *http.Request) {
+	fmt.Println("serve")
 	path := req.URL.Path
+	fmt.Println(path)
 	sess := session.Must(session.NewSession())
 	client := s3.New(sess)
 	o, err := client.GetObject(&s3.GetObjectInput{
@@ -23,6 +25,7 @@ func serve(w http.ResponseWriter, req *http.Request) {
 		Key:    aws.String(path),
 	})
 	if err != nil {
+		fmt.Println(err)
 		if aerr, ok := err.(awserr.Error); ok {
 			switch aerr.Code() {
 			case s3.ErrCodeNoSuchKey:
@@ -48,6 +51,7 @@ func serve(w http.ResponseWriter, req *http.Request) {
 	defer o.Body.Close()
 	_, err = io.Copy(w, o.Body)
 	if err != nil {
+		fmt.Println(err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
@@ -57,11 +61,11 @@ func main() {
 
 	http.HandleFunc("/", serve)
 
-	addr := ":8090"
+	addr := ":5000"
 	host, port := os.Getenv("HOST"), os.Getenv("PORT")
 	if host != "" || port != "" {
 		addr = host + ":" + port
 	}
-	fmt.Printf("Starting on: %s", addr)
+	fmt.Printf("Starting on: %s\n", addr)
 	http.ListenAndServe(addr, nil)
 }
