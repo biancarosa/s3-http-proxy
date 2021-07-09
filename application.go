@@ -15,13 +15,14 @@ import (
 )
 
 func serve(w http.ResponseWriter, req *http.Request) {
-	fmt.Println("serve")
 	path := req.URL.Path
 	fmt.Println(path)
-	sess := session.Must(session.NewSession())
+	sess := session.Must(session.NewSessionWithOptions(session.Options{
+		SharedConfigState: session.SharedConfigEnable,
+	}))
 	client := s3.New(sess)
 	o, err := client.GetObject(&s3.GetObjectInput{
-		Bucket: aws.String("bias-edge-api-bucket"),
+		Bucket: aws.String(os.Getenv("AWS_BUCKET_NAME")),
 		Key:    aws.String(path),
 	})
 	if err != nil {
